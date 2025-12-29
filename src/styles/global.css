@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Stone-based color palette */
   --color-primary: #57534e;
@@ -37,4 +40,39 @@ body {
 }
 .dark body {
   background-image: radial-gradient(#292524 1px, transparent 1px);
+}
+
+/* List view layout */
+.list-view-item article {
+  flex-direction: row;
+  gap: 1.5rem;
+}
+
+.list-view-item article > a {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.list-view-item article .aspect-video {
+  aspect-ratio: 16 / 9;
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.list-view-item article > a > div:last-child {
+  margin-top: 0;
+  padding: 0.5rem 0;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .list-view-item article > a {
+    flex-direction: column;
+  }
+
+  .list-view-item article .aspect-video {
+    width: 100%;
+  }
 }
