@@ -1,0 +1,121 @@
+---
+interface Props {
+  tags: { name: string; count: number }[];
+  totalCount: number;
+  activeTag?: string;
+}
+
+const { tags, totalCount, activeTag } = Astro.props;
+---
+
+<aside class="hidden md:flex flex-col w-80 h-full bg-card-light/95 dark:bg-card-dark/95 backdrop-blur-md border-r border-border-light dark:border-border-dark shrink-0 z-20 shadow-[2px_0_12px_-4px_rgba(0,0,0,0.05)]">
+  <div class="p-8 pb-6 border-b border-border-light/50 dark:border-border-dark/50">
+    <h1 class="text-3xl font-serif font-semibold text-text-primary dark:text-stone-100 tracking-tight">The Archive</h1>
+    <p class="text-[11px] font-sans text-text-secondary dark:text-stone-400 uppercase tracking-[0.2em] mt-1.5 font-medium">Video Repository</p>
+  </div>
+
+  <div class="px-8 py-6 space-y-6">
+    <div class="relative group">
+      <span class="absolute left-0 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-primary dark:group-focus-within:text-stone-200 transition-colors">
+        <span class="material-symbols-outlined text-[20px]">search</span>
+      </span>
+      <input
+        id="tag-search"
+        class="w-full bg-transparent border-b border-stone-300 dark:border-stone-700 py-2 pl-7 pr-2 text-sm text-text-primary dark:text-stone-200 placeholder:text-stone-400 placeholder:font-serif placeholder:italic focus:outline-none focus:border-primary dark:focus:border-stone-400 focus:ring-0 transition-all"
+        placeholder="Find by tag..."
+        type="text"
+      />
+    </div>
+
+    <button
+      id="feeling-lucky"
+      class="w-full flex items-center justify-center gap-2 py-2.5 border border-stone-200 dark:border-stone-700 rounded-md bg-stone-50 dark:bg-stone-800/60 hover:bg-white dark:hover:bg-stone-700 hover:border-primary/30 dark:hover:border-stone-500 hover:shadow-classic text-sm font-serif text-text-primary dark:text-stone-200 transition-all duration-300 group"
+    >
+      <span class="material-symbols-outlined text-[18px] text-stone-400 group-hover:text-primary dark:group-hover:text-stone-200 transition-colors">casino</span>
+      <span>Feeling Lucky</span>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-8 py-2">
+    <h3 class="text-xs font-bold text-stone-400 dark:text-stone-600 uppercase tracking-widest mb-4 sticky top-0 bg-card-light dark:bg-card-dark py-2 z-10">Browse Tags</h3>
+    <ul id="tag-list" class="space-y-1 font-serif">
+      <li>
+        <a
+          href="/"
+          class:list={[
+            "flex items-center justify-between group py-2 px-3 -mx-3 rounded-md transition-colors",
+            !activeTag
+              ? "bg-stone-100 dark:bg-stone-800 text-primary dark:text-white"
+              : "hover:bg-stone-50 dark:hover:bg-stone-800/40 text-text-secondary dark:text-stone-400 hover:text-text-primary dark:hover:text-stone-200"
+          ]}
+        >
+          <span class="text-sm font-medium italic">#All Videos</span>
+          <span class="text-[10px] font-sans text-stone-500 dark:text-stone-400 font-semibold">{totalCount}</span>
+        </a>
+      </li>
+      {tags.map(tag => (
+        <li class="tag-item" data-tag={tag.name.toLowerCase()}>
+          <a
+            href={`/?tag=${encodeURIComponent(tag.name)}`}
+            class:list={[
+              "flex items-center justify-between group py-2 px-3 -mx-3 rounded-md transition-colors",
+              activeTag === tag.name
+                ? "bg-stone-100 dark:bg-stone-800 text-primary dark:text-white"
+                : "hover:bg-stone-50 dark:hover:bg-stone-800/40 text-text-secondary dark:text-stone-400 hover:text-text-primary dark:hover:text-stone-200"
+            ]}
+          >
+            <span class="text-sm">#{tag.name}</span>
+            <span class:list={[
+              "text-[10px] font-sans text-stone-400 transition-opacity",
+              activeTag === tag.name ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            ]}>{tag.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="p-8 border-t border-border-light dark:border-border-dark mt-auto bg-stone-50/80 dark:bg-stone-900/40">
+    <div class="flex items-center gap-2 text-stone-400 mb-2">
+      <span class="material-symbols-outlined text-[16px]">history</span>
+      <span class="text-[10px] uppercase tracking-wider font-bold">Last Viewed</span>
+    </div>
+    <a id="last-viewed" class="block truncate text-sm font-serif italic text-text-secondary dark:text-stone-400 hover:text-primary dark:hover:text-stone-200 transition-colors" href="#">
+      —
+    </a>
+    <div class="mt-6 pt-4 border-t border-stone-200 dark:border-stone-800 flex justify-between items-center opacity-80">
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span class="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Last Built</span>
+      </div>
+      <span id="build-time" class="text-[10px] font-serif italic text-stone-500 dark:text-stone-600"></span>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // Tag search filtering
+  const tagSearch = document.getElementById('tag-search') as HTMLInputElement;
+  const tagItems = document.querySelectorAll('.tag-item');
+
+  tagSearch?.addEventListener('input', (e) => {
+    const query = (e.target as HTMLInputElement).value.toLowerCase();
+    tagItems.forEach(item => {
+      const tag = item.getAttribute('data-tag') || '';
+      (item as HTMLElement).style.display = tag.includes(query) ? '' : 'none';
+    });
+  });
+
+  // Set build time
+  const buildTime = document.getElementById('build-time');
+  if (buildTime) {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    buildTime.textContent = now.toLocaleDateString('en-US', options);
+  }
+</script>

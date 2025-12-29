@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  /* Stone-based color palette */
+  --color-primary: #57534e;
+  --color-primary-hover: #292524;
+  --color-accent: #a8a29e;
+  --color-background-light: #fafaf9;
+  --color-background-dark: #0c0a09;
+  --color-card-light: #ffffff;
+  --color-card-dark: #1c1917;
+  --color-border-light: #e7e5e4;
+  --color-border-dark: #292524;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #78716c;
+
+  /* Typography */
+  --font-serif: "Lora", serif;
+  --font-sans: "Source Sans 3", sans-serif;
+
+  /* Shadows */
+  --shadow-classic: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a29e; }
+.dark ::-webkit-scrollbar-thumb { background: #44403c; }
+
+/* Background pattern */
+body {
+  background-image: radial-gradient(#e7e5e4 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.dark body {
+  background-image: radial-gradient(#292524 1px, transparent 1px);
+}

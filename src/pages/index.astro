@@ -1,0 +1,209 @@
+---
+import fs from 'node:fs';
+import yaml from 'js-yaml';
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import VideoCard from '../components/VideoCard.astro';
+import type { Talk } from '../lib/types';
+import { extractVideoId } from '../lib/youtube';
+
+// Load talks from YAML
+const talksFile = fs.readFileSync('data/talks.yaml', 'utf8');
+const talks = yaml.load(talksFile) as Talk[];
+
+// Get active tag from URL
+const url = new URL(Astro.request.url);
+const activeTag = url.searchParams.get('tag') || undefined;
+
+// Filter talks by tag if provided
+const filteredTalks = activeTag
+  ? talks.filter(talk => talk.tags.includes(activeTag))
+  : talks;
+
+// Build tag list with counts
+const tagCounts = new Map<string, number>();
+talks.forEach(talk => {
+  talk.tags.forEach(tag => {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  });
+});
+const tags = Array.from(tagCounts.entries())
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+
+// Build video IDs for feeling lucky
+const videoIds = talks.map(t => extractVideoId(t.url)).filter(Boolean);
+---
+
+<Layout title={activeTag ? `#${activeTag} - The Archive` : 'The Archive'}>
+  <Sidebar tags={tags} totalCount={talks.length} activeTag={activeTag} />
+
+  <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-background-light dark:bg-background-dark">
+    <!-- Mobile header -->
+    <header class="md:hidden flex items-center justify-between px-6 py-4 bg-card-light/95 dark:bg-card-dark/95 backdrop-blur-sm border-b border-border-light dark:border-border-dark z-10 sticky top-0">
+      <h1 class="text-lg font-serif font-bold text-text-primary dark:text-white">The Archive</h1>
+      <button id="mobile-menu-btn" class="text-stone-500 dark:text-stone-400">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </header>
+
+    <div class="flex-1 overflow-y-auto">
+      <div class="max-w-[1920px] mx-auto px-6 md:px-12 py-8 md:py-12">
+        <!-- Search and dark mode toggle -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+          <div class="relative w-full md:w-96 group">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 group-focus-within:text-primary dark:group-focus-within:text-stone-300 transition-colors">
+              <span class="material-symbols-outlined text-[20px]">search</span>
+            </span>
+            <input
+              id="video-search"
+              class="w-full bg-white dark:bg-stone-900/50 border border-stone-200 dark:border-stone-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-600 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 focus:ring-1 focus:ring-stone-400 dark:focus:ring-stone-600/50 transition-all shadow-sm"
+              placeholder="Search video titles..."
+              type="text"
+            />
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-serif italic text-stone-500 dark:text-stone-400">Dark Mode</span>
+            <button
+              id="dark-mode-toggle"
+              class="bg-stone-200 dark:bg-stone-700 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-stone-600 focus:ring-offset-2 dark:focus:ring-offset-stone-900"
+            >
+              <span aria-hidden="true" class="translate-x-0 dark:translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section header -->
+        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-10 pb-4 border-b border-stone-200 dark:border-stone-800">
+          <div>
+            <h2 class="text-3xl font-serif text-text-primary dark:text-stone-100 tracking-tight">
+              {activeTag ? `#${activeTag}` : 'All Videos'}
+            </h2>
+            <p class="text-sm text-stone-500 mt-1 font-normal font-sans">
+              Viewing <span id="visible-count">{filteredTalks.length}</span> curated items
+            </p>
+          </div>
+          <div class="flex items-center gap-6 mt-4 sm:mt-0">
+            <button class="text-xs font-sans font-semibold text-stone-400 hover:text-text-primary dark:hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
+              Sort by Date <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+            </button>
+            <div class="flex gap-2 text-stone-400 border-l border-stone-300 dark:border-stone-700 pl-6">
+              <button class="hover:text-text-primary dark:hover:text-white transition-colors p-1">
+                <span class="material-symbols-outlined text-[20px]">grid_view</span>
+              </button>
+              <button class="text-text-primary dark:text-white transition-colors p-1">
+                <span class="material-symbols-outlined text-[20px]">view_list</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video grid -->
+        <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-8 gap-y-12">
+          {filteredTalks.map(talk => (
+            <div class="video-item" data-title={talk.title.toLowerCase()} data-speaker={talk.speaker.toLowerCase()}>
+              <VideoCard talk={talk} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Store video IDs for feeling lucky -->
+  <script define:vars={{ videoIds }}>
+    window.__videoIds = videoIds;
+  </script>
+
+  <script>
+    // Dark mode toggle
+    const toggle = document.getElementById('dark-mode-toggle');
+    toggle?.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', document.documentElement.classList.contains('dark') ? 'true' : 'false');
+    });
+
+    // Restore dark mode preference
+    if (localStorage.getItem('darkMode') === 'false') {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Video search
+    const videoSearch = document.getElementById('video-search') as HTMLInputElement;
+    const videoItems = document.querySelectorAll('.video-item');
+    const visibleCount = document.getElementById('visible-count');
+
+    videoSearch?.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+      let count = 0;
+      videoItems.forEach(item => {
+        const title = item.getAttribute('data-title') || '';
+        const speaker = item.getAttribute('data-speaker') || '';
+        const matches = title.includes(query) || speaker.includes(query);
+        (item as HTMLElement).style.display = matches ? '' : 'none';
+        if (matches) count++;
+      });
+      if (visibleCount) visibleCount.textContent = String(count);
+    });
+
+    // Feeling lucky
+    const feelingLucky = document.getElementById('feeling-lucky');
+    feelingLucky?.addEventListener('click', () => {
+      const ids = (window as any).__videoIds as string[];
+      if (ids && ids.length > 0) {
+        const randomId = ids[Math.floor(Math.random() * ids.length)];
+        window.location.href = `/video/${randomId}`;
+      }
+    });
+
+    // Hydrate video cards with localStorage data
+    function formatDuration(seconds: number): string {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = Math.floor(seconds % 60);
+      if (h > 0) {
+        return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      }
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function hydrateVideoCards() {
+      const metadata = JSON.parse(localStorage.getItem('videoMetadata') || '{}');
+
+      // Update duration badges
+      document.querySelectorAll('.duration-badge').forEach(badge => {
+        const videoId = badge.getAttribute('data-video-id');
+        if (videoId && metadata[videoId]?.duration) {
+          badge.textContent = formatDuration(metadata[videoId].duration);
+          badge.classList.remove('hidden');
+        }
+      });
+
+      // Update progress bars
+      document.querySelectorAll('.progress-container').forEach(container => {
+        const videoId = container.getAttribute('data-video-id');
+        if (videoId && metadata[videoId]?.progress && metadata[videoId]?.duration) {
+          const progress = (metadata[videoId].progress / metadata[videoId].duration) * 100;
+          const bar = container.querySelector('.progress-bar') as HTMLElement;
+          if (bar) {
+            bar.style.width = `${Math.min(progress, 100)}%`;
+            container.classList.remove('hidden');
+          }
+        }
+      });
+    }
+
+    // Hydrate last viewed
+    function hydrateLastViewed() {
+      const lastViewed = JSON.parse(localStorage.getItem('lastViewed') || 'null');
+      const lastViewedEl = document.getElementById('last-viewed');
+      if (lastViewed && lastViewedEl) {
+        lastViewedEl.textContent = lastViewed.title;
+        lastViewedEl.setAttribute('href', `/video/${lastViewed.id}`);
+      }
+    }
+
+    hydrateVideoCards();
+    hydrateLastViewed();
+  </script>
+</Layout>
