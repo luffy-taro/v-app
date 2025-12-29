@@ -317,5 +317,44 @@ const videoIds = talks.map(t => extractVideoId(t.url)).filter(Boolean);
         }
       });
     });
+
+    // Make entire list view item clickable
+    function handleListViewClicks() {
+      document.querySelectorAll('.list-view-item').forEach(item => {
+        const videoCard = item.querySelector('.video-card');
+        if (!videoCard) return;
+
+        videoCard.style.cursor = 'pointer';
+
+        videoCard.addEventListener('click', (e) => {
+          const target = e.target as HTMLElement;
+
+          // Don't navigate if clicking on a tag link or button
+          if (target.closest('a[href*="?tag="]') || target.closest('.tag-expand-btn')) {
+            return;
+          }
+
+          // Find the first video link and navigate to it
+          const videoLink = videoCard.querySelector('a[href^="/video/"]') as HTMLAnchorElement;
+          if (videoLink) {
+            window.location.href = videoLink.href;
+          }
+        });
+      });
+    }
+
+    // Call after view changes
+    const originalSetView = setView;
+    setView = function(view: 'grid' | 'list') {
+      originalSetView(view);
+      if (view === 'list') {
+        setTimeout(handleListViewClicks, 0);
+      }
+    };
+
+    // Call on initial load if list view is active
+    if (localStorage.getItem('videoView') === 'list') {
+      setTimeout(handleListViewClicks, 0);
+    }
   </script>
 </Layout>
