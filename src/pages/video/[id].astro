@@ -122,27 +122,30 @@ const giscusConfig = {
 
         <!-- Discussion section with Giscus -->
         <div class="border-t-2 border-border-light dark:border-border-dark pt-10">
-          <div class="flex items-center gap-3 mb-8">
-            <span class="material-symbols-outlined text-stone-400 dark:text-stone-500 text-[20px]">forum</span>
-            <h2 class="text-xl font-mono font-bold text-text-primary dark:text-stone-100">Discussion</h2>
-          </div>
+          <button id="discussion-toggle" class="flex items-center gap-3 mb-8 hover:text-primary transition-colors group w-full text-left">
+            <span class="material-symbols-outlined text-stone-400 dark:text-stone-500 group-hover:text-primary text-[20px]">forum</span>
+            <h2 class="text-xl font-mono font-bold text-text-primary dark:text-stone-100 group-hover:text-primary">Discussion</h2>
+            <span id="discussion-toggle-icon" class="material-symbols-outlined text-stone-400 dark:text-stone-500 group-hover:text-primary text-[20px] ml-auto transition-transform">expand_more</span>
+          </button>
 
-          <!-- Giscus container -->
-          <div id="giscus-container" class="giscus-frame min-h-[300px] overflow-hidden border-2 border-dotted border-border-light dark:border-border-dark p-4">
-            <!-- Giscus will be loaded here -->
-            <div id="giscus-loading" class="flex flex-col items-center justify-center py-16 text-stone-400 dark:text-stone-500">
-              <span class="material-symbols-outlined text-[32px] mb-3 animate-pulse">chat_bubble</span>
-              <p class="text-sm font-mono">loading...</p>
+          <!-- Giscus container (hidden by default) -->
+          <div id="discussion-content" class="hidden">
+            <div id="giscus-container" class="giscus-frame min-h-[300px] overflow-hidden border-2 border-dotted border-border-light dark:border-border-dark p-4">
+              <!-- Giscus will be loaded here -->
+              <div id="giscus-loading" class="flex flex-col items-center justify-center py-16 text-stone-400 dark:text-stone-500">
+                <span class="material-symbols-outlined text-[32px] mb-3 animate-pulse">chat_bubble</span>
+                <p class="text-sm font-mono">loading...</p>
+              </div>
             </div>
-          </div>
 
-          <!-- Giscus fallback info -->
-          <div id="giscus-info" class="hidden mt-6 p-4 bg-stone-50 dark:bg-stone-900/50 border-2 border-border-light dark:border-border-dark">
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-mono">
-              <span class="font-semibold">note:</span> comments powered by
-              <a href="https://giscus.app" target="_blank" rel="noopener" class="underline hover:text-primary transition-colors">giscus</a>.
-              sign in with github to join.
-            </p>
+            <!-- Giscus fallback info -->
+            <div id="giscus-info" class="hidden mt-6 p-4 bg-stone-50 dark:bg-stone-900/50 border-2 border-border-light dark:border-border-dark">
+              <p class="text-xs text-stone-500 dark:text-stone-400 font-mono">
+                <span class="font-semibold">note:</span> comments powered by
+                <a href="https://giscus.app" target="_blank" rel="noopener" class="underline hover:text-primary transition-colors">giscus</a>.
+                sign in with github to join.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -257,8 +260,32 @@ const giscusConfig = {
       loadGiscus();
     }
 
-    // Load Giscus on page load
-    loadGiscus();
+    // Discussion toggle
+    const discussionToggle = document.getElementById('discussion-toggle');
+    const discussionContent = document.getElementById('discussion-content');
+    const discussionIcon = document.getElementById('discussion-toggle-icon');
+    let discussionLoaded = false;
+
+    discussionToggle?.addEventListener('click', () => {
+      const isHidden = discussionContent?.classList.contains('hidden');
+
+      if (isHidden) {
+        discussionContent?.classList.remove('hidden');
+        if (discussionIcon) {
+          discussionIcon.style.transform = 'rotate(180deg)';
+        }
+        // Load Giscus only when first opened
+        if (!discussionLoaded) {
+          loadGiscus();
+          discussionLoaded = true;
+        }
+      } else {
+        discussionContent?.classList.add('hidden');
+        if (discussionIcon) {
+          discussionIcon.style.transform = '';
+        }
+      }
+    });
 
     // Load YouTube API
     const tag = document.createElement('script');
