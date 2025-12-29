@@ -1,12 +1,13 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import yaml from 'js-yaml';
 
 interface Talk {
   title: string;
-  speaker: string;
+  author?: string;
   url: string;
   tags: string[];
-  year: number;
+  year?: number;
 }
 
 const YOUTUBE_URL_REGEX = /^https?:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
@@ -17,38 +18,55 @@ function extractVideoId(url: string): string | null {
 }
 
 function validate(): void {
-  const talksFile = fs.readFileSync('data/talks.yaml', 'utf8');
-  const talks = yaml.load(talksFile) as Talk[];
+  const dataDir = 'data';
+  const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.yaml'));
+
+  if (files.length === 0) {
+    console.error('No YAML files found in data/ directory');
+    process.exit(1);
+  }
 
   const errors: string[] = [];
   const videoIds = new Map<string, string>();
+  let totalTalks = 0;
 
-  talks.forEach((talk, index) => {
-    const prefix = `Talk ${index + 1} ("${talk.title}")`;
+  for (const file of files) {
+    const filePath = path.join(dataDir, file);
+    const content = fs.readFileSync(filePath, 'utf8');
+    const talks = yaml.load(content) as Talk[];
 
-    // Required fields
-    if (!talk.title) errors.push(`${prefix}: missing title`);
-    if (!talk.speaker) errors.push(`${prefix}: missing speaker`);
-    if (!talk.url) errors.push(`${prefix}: missing url`);
-    if (!talk.tags || talk.tags.length === 0) errors.push(`${prefix}: missing tags`);
-
-    // Valid YouTube URL
-    if (talk.url && !YOUTUBE_URL_REGEX.test(talk.url)) {
-      errors.push(`${prefix}: invalid YouTube URL`);
+    if (!Array.isArray(talks)) {
+      errors.push(`${file}: not a valid array of talks`);
+      continue;
     }
 
-    // Duplicate check
-    if (talk.url) {
-      const videoId = extractVideoId(talk.url);
-      if (videoId) {
-        if (videoIds.has(videoId)) {
-          errors.push(`${prefix}: duplicate video ID "${videoId}" (already used by "${videoIds.get(videoId)}")`);
-        } else {
-          videoIds.set(videoId, talk.title);
+    talks.forEach((talk, index) => {
+      totalTalks++;
+      const prefix = `${file} - Talk ${index + 1} ("${talk.title}")`;
+
+      // Required fields (author and year are optional)
+      if (!talk.title) errors.push(`${prefix}: missing title`);
+      if (!talk.url) errors.push(`${prefix}: missing url`);
+      if (!talk.tags || talk.tags.length === 0) errors.push(`${prefix}: missing tags`);
+
+      // Valid YouTube URL
+      if (talk.url && !YOUTUBE_URL_REGEX.test(talk.url)) {
+        errors.push(`${prefix}: invalid YouTube URL`);
+      }
+
+      // Duplicate check (across all files)
+      if (talk.url) {
+        const videoId = extractVideoId(talk.url);
+        if (videoId) {
+          if (videoIds.has(videoId)) {
+            errors.push(`${prefix}: duplicate video ID "${videoId}" (already used by "${videoIds.get(videoId)}")`);
+          } else {
+            videoIds.set(videoId, `${file}: ${talk.title}`);
+          }
         }
       }
-    }
-  });
+    });
+  }
 
   if (errors.length > 0) {
     console.error('Validation failed:\n');
@@ -56,7 +74,7 @@ function validate(): void {
     process.exit(1);
   }
 
-  console.log(`✓ Validated ${talks.length} talks, no issues found.`);
+  console.log(`✓ Validated ${totalTalks} talks across ${files.length} file(s), no issues found.`);
 }
 
 validate();

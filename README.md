@@ -4,7 +4,7 @@ A curated collection of software/tech talks from YouTube. Community-contributed 
 
 ## Features
 
-- Browse and search video talks by title, speaker, or tags
+- Browse and search video talks by title, author, or tags
 - Filter by tags in the sidebar
 - "Feeling Lucky" random video selection
 - Video progress tracking (localStorage)
@@ -61,22 +61,25 @@ npm run preview
 
 ## Adding Videos
 
-Edit `data/talks.yaml` and add a new entry:
+Add entries to any `.yaml` file in the `data/` directory:
 
 ```yaml
 - title: "Your Talk Title"
-  speaker: "Speaker Name"
+  author: "Speaker Name"  # optional
   url: https://www.youtube.com/watch?v=VIDEO_ID
   tags: [tag1, tag2, tag3]
-  year: 2024
+  year: 2024  # optional
 ```
+
+You can organize videos across multiple files (e.g., `talks.yaml`, `classics.yaml`, `conferences.yaml`).
 
 Run `npm run validate` to check for errors before committing.
 
 ### Validation Rules
 
-- No duplicate YouTube URLs
-- Required fields: title, speaker, url, tags
+- No duplicate YouTube URLs (across all files)
+- Required fields: title, url, tags
+- Optional fields: author, year
 - URL must be a valid YouTube link
 
 ## Comments Setup (Giscus)
@@ -170,7 +173,8 @@ jobs:
 
 ```
 ├── data/
-│   └── talks.yaml          # Video data
+│   ├── talks.yaml          # Video data (multiple .yaml files supported)
+│   └── classics.yaml
 ├── scripts/
 │   └── validate.ts         # Data validation
 ├── src/
@@ -180,6 +184,7 @@ jobs:
 │   ├── layouts/
 │   │   └── Layout.astro
 │   ├── lib/
+│   │   ├── talks.ts        # Multi-file YAML loader
 │   │   ├── types.ts
 │   │   └── youtube.ts
 │   ├── pages/

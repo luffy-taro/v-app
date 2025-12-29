@@ -1,19 +1,15 @@
 ---
-import fs from 'node:fs';
-import yaml from 'js-yaml';
 import Layout from '../../layouts/Layout.astro';
 import Sidebar from '../../components/Sidebar.astro';
-import type { Talk } from '../../lib/types';
+import { loadTalks } from '../../lib/talks';
 import { extractVideoId } from '../../lib/youtube';
 
-// Load talks from YAML
-const talksFile = fs.readFileSync('data/talks.yaml', 'utf8');
-const talks = yaml.load(talksFile) as Talk[];
+// Load talks from all YAML files in data/
+const talks = loadTalks();
 
 // Generate static paths for all videos
 export function getStaticPaths() {
-  const talksFile = fs.readFileSync('data/talks.yaml', 'utf8');
-  const talks = yaml.load(talksFile) as Array<{ url: string }>;
+  const talks = loadTalks();
 
   return talks.map(talk => {
     const id = talk.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)?.[1];
@@ -106,10 +102,10 @@ const giscusConfig = {
             {talk.title}
           </h1>
           <div class="flex flex-wrap items-center gap-4 text-sm text-stone-500 dark:text-stone-400">
-            <span class="font-semibold uppercase tracking-wider text-xs">{talk.speaker}</span>
-            <span class="text-stone-300 dark:text-stone-600">•</span>
-            <span class="font-serif italic">{talk.year}</span>
-            <span class="text-stone-300 dark:text-stone-600">•</span>
+            {talk.author && <span class="font-semibold uppercase tracking-wider text-xs">{talk.author}</span>}
+            {talk.author && talk.year && <span class="text-stone-300 dark:text-stone-600">•</span>}
+            {talk.year && <span class="font-serif italic">{talk.year}</span>}
+            {(talk.author || talk.year) && <span class="text-stone-300 dark:text-stone-600">•</span>}
             <span id="duration" class="font-serif italic">—</span>
           </div>
           <div class="mt-4 flex flex-wrap gap-2">

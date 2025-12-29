@@ -1,7 +1,7 @@
 export interface Talk {
   title: string;
-  speaker: string;
+  author?: string;
   url: string;
   tags: string[];
-  year: number;
+  year?: number;
 }

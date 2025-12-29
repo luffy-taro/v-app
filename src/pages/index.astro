@@ -1,15 +1,12 @@
 ---
-import fs from 'node:fs';
-import yaml from 'js-yaml';
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/Sidebar.astro';
 import VideoCard from '../components/VideoCard.astro';
-import type { Talk } from '../lib/types';
+import { loadTalks } from '../lib/talks';
 import { extractVideoId } from '../lib/youtube';
 
-// Load talks from YAML
-const talksFile = fs.readFileSync('data/talks.yaml', 'utf8');
-const talks = yaml.load(talksFile) as Talk[];
+// Load talks from all YAML files in data/
+const talks = loadTalks();
 
 // Build tag list with counts
 const tagCounts = new Map<string, number>();
@@ -101,7 +98,7 @@ const videoIds = talks.map(t => extractVideoId(t.url)).filter(Boolean);
         <!-- Video grid -->
         <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-8 gap-y-12">
           {talks.map(talk => (
-            <div class="video-item" data-title={talk.title.toLowerCase()} data-speaker={talk.speaker.toLowerCase()} data-tags={talk.tags.join(',').toLowerCase()} data-year={talk.year || 0}>
+            <div class="video-item" data-title={talk.title.toLowerCase()} data-author={(talk.author || '').toLowerCase()} data-tags={talk.tags.join(',').toLowerCase()} data-year={talk.year || 0}>
               <VideoCard talk={talk} />
             </div>
           ))}
@@ -139,12 +136,12 @@ const videoIds = talks.map(t => extractVideoId(t.url)).filter(Boolean);
       videoItems.forEach(item => {
         const el = item as HTMLElement;
         const title = el.getAttribute('data-title') || '';
-        const speaker = el.getAttribute('data-speaker') || '';
+        const author = el.getAttribute('data-author') || '';
         const tags = el.getAttribute('data-tags') || '';
 
         const matchesSearch = !currentSearch ||
           title.includes(currentSearch) ||
-          speaker.includes(currentSearch);
+          author.includes(currentSearch);
 
         const matchesTag = !currentTag ||
           tags.split(',').includes(currentTag);
@@ -294,5 +291,31 @@ const videoIds = talks.map(t => extractVideoId(t.url)).filter(Boolean);
     }
 
     hydrateVideoCards();
+
+    // Tag expand functionality
+    document.querySelectorAll('.tag-expand-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const container = btn.closest('.tag-container');
+        if (!container) return;
+
+        const hiddenTags = container.querySelectorAll('.tag-hidden') as NodeListOf<HTMLElement>;
+        const isExpanded = btn.getAttribute('data-expanded') === 'true';
+
+        if (isExpanded) {
+          // Collapse
+          hiddenTags.forEach(tag => tag.style.display = 'none');
+          const totalTags = parseInt(container.getAttribute('data-total-tags') || '0');
+          btn.textContent = `+${totalTags - 2}`;
+          btn.setAttribute('data-expanded', 'false');
+        } else {
+          // Expand
+          hiddenTags.forEach(tag => tag.style.display = 'inline-block');
+          btn.textContent = '−';
+          btn.setAttribute('data-expanded', 'true');
+        }
+      });
+    });
   </script>
 </Layout>

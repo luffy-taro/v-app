@@ -1,29 +1,29 @@
 - title: Simple Made Easy
-  speaker: Rich Hickey
+  author: Rich Hickey
   url: https://www.youtube.com/watch?v=SxdOUGdseq4
   tags: [functional-programming, architecture, simplicity]
   year: 2011
 
 - title: The Value of Values
-  speaker: Rich Hickey
+  author: Rich Hickey
   url: https://www.youtube.com/watch?v=-6BsiVyC1kM
   tags: [functional-programming, data, immutability]
   year: 2012
 
 - title: Inventing on Principle
-  speaker: Bret Victor
+  author: Bret Victor
   url: https://www.youtube.com/watch?v=PUv66718DII
-  tags: [creativity, tools, live-coding]
+  tags: [creativity, tools, live-coding, history, programming-languages, creativity, javascript, ruby, humor]
   year: 2012
 
 - title: The Future of Programming
-  speaker: Bret Victor
+  author: Bret Victor
   url: https://www.youtube.com/watch?v=8pTEmbeENF4
   tags: [history, programming-languages, creativity]
   year: 2013
 
 - title: Wat
-  speaker: Gary Bernhardt
+  author: Gary Bernhardt
   url: https://www.youtube.com/watch?v=3m5qxZm_JqM
   tags: [javascript, ruby, humor]
   year: 2012
