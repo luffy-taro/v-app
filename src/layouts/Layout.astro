@@ -16,9 +16,9 @@ const { title = 'The Archive' } = Astro.props;
     <title>{title}</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   </head>
-  <body class="font-sans bg-background-light dark:bg-background-dark text-text-primary dark:text-stone-200 antialiased h-screen overflow-hidden flex flex-col md:flex-row transition-colors duration-300">
+  <body class="font-mono bg-background-light dark:bg-background-dark text-text-primary dark:text-stone-200 antialiased h-screen overflow-hidden flex flex-col md:flex-row transition-colors duration-300">
     <slot />
   </body>
 </html>

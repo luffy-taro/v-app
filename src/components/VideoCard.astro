@@ -13,43 +13,43 @@ const hasAuthor = talk.author && talk.author.trim();
 const hasYear = talk.year !== undefined && talk.year !== null;
 ---
 
-<article class="video-card group cursor-pointer flex flex-col h-full">
+<article class="video-card group cursor-pointer flex flex-col h-full border-2 border-dotted border-border-light dark:border-border-dark p-3 hover:border-primary dark:hover:border-primary transition-colors bg-card-light dark:bg-card-dark">
   <!-- Thumbnail -->
   <a href={`/video/${videoId}`} class="thumbnail-link block flex-shrink-0">
-    <div class="relative aspect-video w-full overflow-hidden rounded-md bg-stone-100 dark:bg-stone-800 shadow-classic group-hover:shadow-hover transition-all duration-500 border border-stone-200 dark:border-stone-700/50">
+    <div class="relative aspect-video w-full overflow-hidden bg-stone-100 dark:bg-stone-800 transition-all duration-300 border-2 border-border-light dark:border-border-dark group-hover:border-primary">
       <img
         alt={talk.title}
-        class="h-full w-full object-cover opacity-95 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale-[0.1] group-hover:grayscale-0"
+        class="h-full w-full object-cover opacity-95 group-hover:opacity-100 transition-opacity duration-300"
         src={thumbnailUrl}
         loading="lazy"
       />
       <!-- Progress bar (will be populated via JS from localStorage) -->
-      <div class="progress-container absolute bottom-0 left-0 right-0 h-0.5 bg-black/20 hidden" data-video-id={videoId}>
-        <div class="progress-bar h-full bg-red-600/90 w-0"></div>
+      <div class="progress-container absolute bottom-0 left-0 right-0 h-1 bg-stone-800/40 hidden" data-video-id={videoId}>
+        <div class="progress-bar h-full bg-primary w-0"></div>
       </div>
       <!-- Duration (will be populated via JS from localStorage) -->
-      <div class="duration-badge absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded text-[10px] font-sans font-medium tracking-wide text-white border border-white/5 hidden" data-video-id={videoId}></div>
+      <div class="duration-badge absolute bottom-2 right-2 bg-background-dark px-1.5 py-0.5 text-[9px] font-mono font-semibold text-stone-300 border border-border-dark hidden" data-video-id={videoId}></div>
     </div>
   </a>
 
   <!-- Content: info + tags -->
   <div class="video-content mt-3 flex flex-col flex-1 min-w-0">
     <a href={`/video/${videoId}`} class="block">
-      <h3 class="text-lg font-serif font-medium leading-snug text-text-primary dark:text-stone-100 group-hover:text-primary dark:group-hover:text-stone-300 transition-colors">{talk.title}</h3>
+      <h3 class="text-base font-mono font-medium leading-snug text-text-primary dark:text-stone-100 group-hover:text-primary transition-colors">{talk.title}</h3>
       {(hasAuthor || hasYear) && (
         <div class="mt-1.5 flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
-          {hasAuthor && <span class="font-semibold uppercase tracking-wider text-[10px]">{talk.author}</span>}
-          {hasAuthor && hasYear && <span class="text-stone-300 dark:text-stone-600">•</span>}
-          {hasYear && <span class="font-serif italic">{talk.year}</span>}
+          {hasAuthor && <span class="font-mono font-semibold uppercase tracking-wider text-[10px]">{talk.author}</span>}
+          {hasAuthor && hasYear && <span class="text-stone-300 dark:text-stone-600">|</span>}
+          {hasYear && <span class="font-mono text-[10px]">{talk.year}</span>}
         </div>
       )}
     </a>
     <!-- Tags section -->
-    <div class="mt-2 flex flex-wrap gap-1 tag-container" data-total-tags={talk.tags.length}>
+    <div class="mt-2.5 flex flex-wrap gap-1.5 tag-container" data-total-tags={talk.tags.length}>
       {talk.tags.slice(0, 2).map(tag => (
         <a
           href={`/?tag=${encodeURIComponent(tag.toLowerCase())}`}
-          class="inline-block px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 text-[10px] font-sans font-medium text-stone-500 dark:text-stone-400 hover:border-primary dark:hover:border-stone-500 hover:text-text-primary dark:hover:text-stone-200 transition-colors"
+          class="inline-block px-2 py-1 border border-border-light dark:border-border-dark bg-card-light dark:bg-background-dark text-[10px] font-mono font-medium text-text-secondary dark:text-stone-400 hover:border-primary hover:text-primary transition-colors"
         >#{tag}</a>
       ))}
       {talk.tags.length > 2 && (
@@ -57,13 +57,13 @@ const hasYear = talk.year !== undefined && talk.year !== null;
           {talk.tags.slice(2).map(tag => (
             <a
               href={`/?tag=${encodeURIComponent(tag.toLowerCase())}`}
-              class="tag-hidden px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 text-[10px] font-sans font-medium text-stone-500 dark:text-stone-400 hover:border-primary dark:hover:border-stone-500 hover:text-text-primary dark:hover:text-stone-200 transition-colors"
+              class="tag-hidden px-2 py-1 border border-border-light dark:border-border-dark bg-card-light dark:bg-background-dark text-[10px] font-mono font-medium text-text-secondary dark:text-stone-400 hover:border-primary hover:text-primary transition-colors"
               style="display: none;"
             >#{tag}</a>
           ))}
           <button
             type="button"
-            class="tag-expand-btn inline-block px-2 py-0.5 rounded border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 text-[10px] font-sans font-medium text-stone-400 dark:text-stone-500 hover:border-primary dark:hover:border-stone-500 hover:text-text-primary dark:hover:text-stone-200 transition-colors cursor-pointer"
+            class="tag-expand-btn inline-block px-2 py-1 border border-border-light dark:border-border-dark bg-card-light dark:bg-background-dark text-[10px] font-mono font-medium text-stone-400 dark:text-stone-500 hover:border-primary hover:text-primary transition-colors cursor-pointer"
           >+{talk.tags.length - 2}</button>
         </>
       )}
