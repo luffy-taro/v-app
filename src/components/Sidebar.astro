@@ -133,17 +133,18 @@ const { tags, totalCount, videoIds = [], currentTag = '' } = Astro.props;
   const urlParams = new URLSearchParams(window.location.search);
   const currentUrlTag = urlParams.get('tag') || '';
   const tagButtons = document.querySelectorAll('.tag-filter-btn');
-  const activeClass = 'bg-stone-100 dark:bg-stone-800 text-primary dark:text-white';
-  const inactiveClass = 'hover:bg-stone-50 dark:hover:bg-stone-800/40 text-text-secondary dark:text-stone-400 hover:text-text-primary dark:hover:text-stone-200';
+  const activeClasses = ['bg-primary/10', 'dark:bg-primary/20', 'text-primary', 'border-l-2', 'border-primary'];
+  const inactiveClasses = ['hover:bg-stone-100', 'dark:hover:bg-stone-800/50', 'text-text-secondary', 'dark:text-stone-400', 'hover:text-text-primary', 'dark:hover:text-stone-200', 'border-l-2', 'border-transparent'];
 
   tagButtons.forEach(btn => {
     const tag = btn.getAttribute('data-tag') || '';
     const isActive = tag === currentUrlTag;
 
-    // Remove existing classes and apply correct ones
-    activeClass.split(' ').forEach(c => btn.classList.remove(c));
-    inactiveClass.split(' ').forEach(c => btn.classList.remove(c));
-    (isActive ? activeClass : inactiveClass).split(' ').forEach(c => btn.classList.add(c));
+    // Remove all possible classes first
+    [...activeClasses, ...inactiveClasses].forEach(c => btn.classList.remove(c));
+
+    // Apply correct classes
+    (isActive ? activeClasses : inactiveClasses).forEach(c => btn.classList.add(c));
 
     // Show count on active tag
     const countEl = btn.querySelector('.tag-count, span:last-child');
